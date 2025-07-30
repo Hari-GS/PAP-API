@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 public class UserDto {
 
     private Long id;
-    private String firstName;
-    private String lastName;
-    private String login;
+    private String name;
+    private String email;
     private String token;
-    private String password;
+    private Long organization;
+    private String role;
+//    private String password;
 }

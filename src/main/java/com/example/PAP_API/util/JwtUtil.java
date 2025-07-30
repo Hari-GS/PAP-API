@@ -1,5 +1,6 @@
 package com.example.PAP_API.util;
 
+import com.example.PAP_API.model.HRManager;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
@@ -46,4 +47,22 @@ public class JwtUtil {
                 .getExpiration()
                 .before(new Date());
     }
+
+    public String generateResetToken(HRManager hrManager) {
+        return Jwts.builder()
+                .setSubject(hrManager.getEmail())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + 15 * 60 * 1000)) // 15 minutes
+                .signWith(key,SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String extractEmail(String token) {
+        return Jwts.parser()
+                .setSigningKey(key)
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
+    }
+
 }

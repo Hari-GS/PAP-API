@@ -21,23 +21,27 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                // Handle unauthorized access
+                // Return 401 for unauthorized access
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(userAuthenticationEntryPoint)
                 )
-                // Add JWT Authentication Filter before Basic Authentication
+                // Add custom JWT filter before Spring’s BasicAuthenticationFilter
                 .addFilterBefore(new JwtAuthFilter(userAuthenticationProvider), BasicAuthenticationFilter.class)
-                // Disable CSRF as we're using JWT (stateless)
-                .csrf(csrf -> csrf.disable())
-                // Set session management to stateless
+                .csrf(csrf -> csrf.disable()) // No CSRF for stateless APIs
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                // Configure authorized endpoints
                 .authorizeHttpRequests(auth ->
                         auth
-                                .requestMatchers(HttpMethod.POST, "/login", "/register").permitAll() // Allow login & register
-                                .anyRequest().authenticated() // Protect other endpoints
+                                // Allow login/register endpoints (usually under /auth)
+                                .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+
+                                // TEST ENDPOINTS BASED ON ROLE
+                                .requestMatchers("/api/test/hr").hasRole("HR") // Only HR can access
+                                .requestMatchers("/api/test/employee").hasRole("EMPLOYEE") // Only Employee can access
+
+                                // All other endpoints require authentication
+                                .anyRequest().authenticated()
                 );
 
         return http.build();

@@ -1,11 +1,13 @@
 package com.example.PAP_API.repository;
 
-import com.example.PAP_API.model.TheUser;
+import com.example.PAP_API.model.HRManager;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-public interface UserRepository extends JpaRepository<TheUser, Long> {
+@Repository
+public interface UserRepository extends JpaRepository<HRManager, Long> {
 
-    Optional<TheUser> findByLogin(String login);
+    Optional<HRManager> findByEmail(String login);
 }

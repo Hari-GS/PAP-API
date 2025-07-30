@@ -1,0 +1,14 @@
+package com.example.PAP_API.repository;
+
+import com.example.PAP_API.model.Appraisal;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
+@Repository
+public interface AppraisalRepository extends JpaRepository<Appraisal, Long> {
+    List<Appraisal> findByHrManagerId(Long hrManagerId);
+    Optional<Appraisal> findByIdAndHrManagerId(Long id, Long hrId);
+}

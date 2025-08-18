@@ -101,4 +101,10 @@ public class NewEmployeeController {
         return ResponseEntity.ok(hrWelcomeCardDto);
     }
 
+    @GetMapping("/appraisals")
+    public ResponseEntity<List<EmployeeAppraisalSummaryDto>> getMyAppraisals(@AuthenticationPrincipal UserDto employee) {
+        List<EmployeeAppraisalSummaryDto> appraisals = employeeService.getAppraisalsForEmployee(employee.getId());
+        return ResponseEntity.ok(appraisals);
+    }
+
 }

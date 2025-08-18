@@ -17,5 +17,5 @@ public class UserDto {
     private String token;
     private Long organization;
     private String role;
-//    private String password;
+    private String designation;
 }

@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class AppraisalQuestionDto {
+    private long id;
     private String text;
     private boolean showPoints;
     private int orderIndex;

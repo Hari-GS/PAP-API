@@ -37,9 +37,10 @@ public class AppraisalService {
         if (appraisal.getParticipants() != null) {
             for (AppraisalParticipant participant : appraisal.getParticipants()) {
                 participant.setAppraisal(appraisal);
-
+                participant.setTotalQns(participant.getQuestions().stream().count());
                 if (participant.getQuestions() != null) {
                     for (AppraisalQuestion question : participant.getQuestions()) {
+                        question.setId(null); // ✅ Critical line
                         question.setParticipant(participant);
                     }
                 }

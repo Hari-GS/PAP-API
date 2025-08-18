@@ -68,10 +68,21 @@ public class UserService {
     }
 
     public UserDto findByLogin(String login) {
-        HRManager user = userRepository.findByEmail(login)
-                .orElseThrow(() -> new AppException("Unknown user", HttpStatus.NOT_FOUND));
-        return userMapper.toUserDto(user);
+        Optional<HRManager> hrOpt = userRepository.findByEmail(login);
+        if (hrOpt.isPresent()) {
+            UserDto userDto = userMapper.toUserDto(hrOpt.get());
+            userDto.setDesignation("Human Resources Manager");
+            return userDto;
+        }
+
+        Optional<NewEmployee> empOpt = newEmployeeRepository.findByEmail(login);
+        if (empOpt.isPresent()) {
+            return userMapper.toUserDto(empOpt.get());
+        }
+
+        throw new AppException("Unknown user", HttpStatus.NOT_FOUND);
     }
+
 
     public NewEmployeeDto loginEmployee(CredentialsDto dto) {
         NewEmployee employee = newEmployeeRepository.findByEmail(dto.getEmail())

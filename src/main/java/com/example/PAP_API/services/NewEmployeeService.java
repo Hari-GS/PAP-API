@@ -3,13 +3,8 @@ package com.example.PAP_API.services;
 import com.example.PAP_API.dto.*;
 import com.example.PAP_API.exception.ResourceNotFoundException;
 import com.example.PAP_API.mappers.NewEmployeeMapper;
-import com.example.PAP_API.model.Employee;
-import com.example.PAP_API.model.HRManager;
-import com.example.PAP_API.model.NewEmployee;
-import com.example.PAP_API.repository.EmployeeRepository;
-import com.example.PAP_API.repository.HRManagerRepository;
-import com.example.PAP_API.repository.NewEmployeeRepository;
-import com.example.PAP_API.repository.OrganizationRepository;
+import com.example.PAP_API.model.*;
+import com.example.PAP_API.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +31,9 @@ public class NewEmployeeService {
 
     @Autowired
     UserContextService userContext;
+
+    @Autowired
+    private AppraisalParticipantRepository participantRepository;
 
     public ResponseEntity<List<NewEmployeeDto>> getAllEmployees() {
         Long hrId = userContext.getCurrentUserId();
@@ -135,6 +133,29 @@ public class NewEmployeeService {
             dto.setManagerId(emp.getManager() != null ? emp.getManager().getEmployeeId() : null);
             return dto;
         }).collect(Collectors.toList());
+    }
+
+    public List<EmployeeAppraisalSummaryDto> getAppraisalsForEmployee(Long id) {
+        NewEmployee employee = employeeRepository.findById(id).get();
+        List<AppraisalParticipant> participants = participantRepository.findByEmployeeId(employee.getEmployeeId());
+
+        return participants.stream().map(p -> {
+            Appraisal a = p.getAppraisal();
+            EmployeeAppraisalSummaryDto dto = new EmployeeAppraisalSummaryDto();
+            dto.setAppraisalId(a.getId());
+            dto.setTitle(a.getTitle());
+            dto.setStatus(p.getSelfAppraisalStatus().toString());
+            dto.setType(a.getType());
+            dto.setStartDate(a.getStartDate().toString());
+            dto.setSelfAppraisalEndDate(a.getSelfAppraisalEndDate().toString());
+            dto.setEndDate(a.getEndDate().toString());
+            dto.setStage(a.getStage().name());
+            dto.setCreatedAt(a.getCreatedAt().toString());
+            dto.setCreatedBy(a.getHrManager().getName());
+            dto.setTotalSelfQns(p.getTotalQns());
+            dto.setSelfQnsAnswered(p.getTotalQnsAnswered());
+            return dto;
+        }).toList();
     }
 
 }

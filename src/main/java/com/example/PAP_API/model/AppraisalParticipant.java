@@ -1,5 +1,6 @@
 package com.example.PAP_API.model;
 
+import com.example.PAP_API.enums.Statuses;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -18,7 +19,9 @@ public class AppraisalParticipant {
     private String employeeName;
     private String designation;
     private String managerName;
-    private String status;
+    private Statuses selfAppraisalStatus= Statuses.NOT_STARTED;
+    private Long totalQns;
+    private Integer totalQnsAnswered=0;
 
     @ManyToOne
     @JoinColumn(name = "appraisal_id")

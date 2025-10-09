@@ -15,4 +15,9 @@ public interface AppraisalParticipantRepository extends JpaRepository<AppraisalP
 
     Optional<AppraisalParticipant> findByAppraisalIdAndEmployeeId(Long appraisalId, String empId);
 
+    List<AppraisalParticipant> findByAppraisalIdAndReportingPersonId(Long appraisalId, Long reportingPersonId);
+
+    Optional<AppraisalParticipant> findByAppraisalIdAndReportingPersonIdAndId(
+            Long appraisalId, Long reportingPersonId, Long id);
+
 }

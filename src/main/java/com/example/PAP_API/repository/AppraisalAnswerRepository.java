@@ -10,4 +10,5 @@ public interface AppraisalAnswerRepository extends JpaRepository<SelfAppraisalAn
     // Fetch all answers for a participant in a specific appraisal
     List<SelfAppraisalAnswer> findByParticipant_EmployeeIdAndParticipant_AppraisalId(String employeeId, Long appraisalId);
     Optional<SelfAppraisalAnswer> findByParticipantIdAndQuestionId(Long participantId, Long questionId);
+
 }

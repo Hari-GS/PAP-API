@@ -16,6 +16,8 @@ public class SelfAppraisalAnswer {
 
     private String answerText;
 
+    private String reportingPersonComment;
+
     @ManyToOne
     @JoinColumn(name = "question_id")
     private AppraisalQuestion question;

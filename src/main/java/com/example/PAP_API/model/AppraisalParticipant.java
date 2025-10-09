@@ -29,4 +29,8 @@ public class AppraisalParticipant {
 
     @OneToMany(mappedBy = "participant", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AppraisalQuestion> questions = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "reporting_person_id")
+    private NewEmployee reportingPerson;
 }

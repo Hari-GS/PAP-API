@@ -1,6 +1,7 @@
 package com.example.PAP_API.services;
 
 import com.example.PAP_API.dto.AppraisalQuestionDto;
+import com.example.PAP_API.dto.ReportingPersonDto;
 import com.example.PAP_API.dto.SelfAppraisalAnswerDto;
 import com.example.PAP_API.dto.UserDto;
 import com.example.PAP_API.enums.Statuses;
@@ -12,6 +13,7 @@ import com.example.PAP_API.repository.AppraisalAnswerRepository;
 import com.example.PAP_API.repository.AppraisalParticipantRepository;
 import com.example.PAP_API.repository.AppraisalQuestionRepository;
 import com.example.PAP_API.repository.NewEmployeeRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -116,4 +118,24 @@ public class SelfAppraisalService {
 
     }
 
+    public List<SelfAppraisalAnswerDto> addReportingPersonComment(List<ReportingPersonDto> dtos) {
+        List<SelfAppraisalAnswerDto> updatedAnswers = new ArrayList<>();
+
+        for (ReportingPersonDto dto : dtos) {
+            SelfAppraisalAnswer answer = answerRepo.findById(dto.getAnswerId())
+                    .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + dto.getAnswerId()));
+
+            answer.setReportingPersonComment(dto.getReportingPersonComment());
+            SelfAppraisalAnswer saved = answerRepo.save(answer);
+
+            updatedAnswers.add(selfAppraisalAnswerMapper.toDTO(saved));
+        }
+
+        return updatedAnswers;
+    }
+
+
+    public List<AppraisalParticipant> getParticipantsForReporting(Long appraisalId, Long reportingPersonId) {
+        return participantRepo.findByAppraisalIdAndReportingPersonId(appraisalId, reportingPersonId);
+    }
 }

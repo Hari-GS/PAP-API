@@ -11,7 +11,8 @@ public class AppraisalParticipantDto {
     private String employeeName;
     private String designation;
     private String managerName;
-    private String status;
+    private String managerId;
+    private String selfAppraisalStatus;
 
 
     private List<AppraisalQuestionDto> questions;

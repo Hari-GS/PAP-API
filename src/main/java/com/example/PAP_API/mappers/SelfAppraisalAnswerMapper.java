@@ -10,8 +10,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface SelfAppraisalAnswerMapper {
 
-    // Map nested `question.id` to `questionId` in DTO
+    // Map question.id -> questionId and question.text -> questionText
     @Mapping(source = "question.id", target = "questionId")
+    @Mapping(source = "question.text", target = "questionText")
     SelfAppraisalAnswerDto toDTO(SelfAppraisalAnswer answer);
 
     List<SelfAppraisalAnswerDto> toDTOList(List<SelfAppraisalAnswer> answers);

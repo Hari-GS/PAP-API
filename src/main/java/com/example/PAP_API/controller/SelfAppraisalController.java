@@ -1,6 +1,7 @@
 package com.example.PAP_API.controller;
 
 import com.example.PAP_API.dto.AppraisalQuestionDto;
+import com.example.PAP_API.dto.ReportingPersonDto;
 import com.example.PAP_API.dto.SelfAppraisalAnswerDto;
 import com.example.PAP_API.dto.UserDto;
 import com.example.PAP_API.model.SelfAppraisalAnswer;
@@ -36,5 +37,12 @@ public class SelfAppraisalController {
     @GetMapping("/self-appraisal/{appraisalId}/answers")
     public List<SelfAppraisalAnswerDto> getSavedAnswers(@PathVariable Long appraisalId, @AuthenticationPrincipal UserDto participant) {
         return selfAppraisalService.getAnswersByParticipant(appraisalId, participant);
+    }
+
+    //Endpoint for reporting person to add comments
+    @PutMapping("/self-appraisal/reporting-person-comment")
+    public ResponseEntity<List<SelfAppraisalAnswerDto>> addReportingPersonComment(@RequestBody List<ReportingPersonDto> dtos){
+        System.out.println(dtos.toString());
+        return ResponseEntity.ok(selfAppraisalService.addReportingPersonComment(dtos));
     }
 }

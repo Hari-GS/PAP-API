@@ -3,10 +3,10 @@ package com.example.PAP_API.dto;
 import lombok.Data;
 
 @Data
-public class SelfAppraisalAnswerDto {
+public class ParticipantAppraisalAnswersDto {
     private Long id;
-    private Long questionId;
-    private String questionText;
     private String answerText;
     private String reportingPersonComment;
+    private Long questionId;
+    private Long participantId;
 }

@@ -13,7 +13,7 @@ public class AppraisalParticipantDto {
     private String managerName;
     private String managerId;
     private String selfAppraisalStatus;
-
+    private String reviewAppraisalStatus;
 
     private List<AppraisalQuestionDto> questions;
 }

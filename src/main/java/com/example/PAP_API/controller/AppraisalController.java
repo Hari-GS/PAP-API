@@ -3,8 +3,10 @@ package com.example.PAP_API.controller;
 import com.example.PAP_API.dto.AppraisalDto;
 import com.example.PAP_API.mappers.AppraisalMapper;
 import com.example.PAP_API.model.Appraisal;
+import com.example.PAP_API.repository.AppraisalRepository;
 import com.example.PAP_API.services.AppraisalService;
 import com.example.PAP_API.services.UserContextService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +26,9 @@ public class AppraisalController {
 
     @Autowired
     UserContextService userContextService;
+
+    @Autowired
+    AppraisalRepository appraisalRepo;
 
     @PostMapping
     public ResponseEntity<String> createAppraisal(@RequestBody AppraisalDto dto) {
@@ -52,6 +57,14 @@ public class AppraisalController {
         Long hrId = userContextService.getCurrentUserId();
         Appraisal updated = appraisalService.moveToNextStage(id, hrId);
         return ResponseEntity.ok("Appraisal forcibly moved to stage: " + updated.getStage());
+    }
+
+    @GetMapping("/recent")
+    public ResponseEntity<AppraisalDto> getMostRecentAppraisal() {
+        Long hrId = userContextService.getCurrentUserId();
+        Appraisal recent = appraisalRepo.findTopByHrManagerIdOrderByEndDateDesc(hrId)
+                .orElseThrow(() -> new EntityNotFoundException("No recent appraisals found"));
+        return ResponseEntity.ok(appraisalMapper.toDto(recent));
     }
 
 }

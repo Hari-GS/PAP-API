@@ -1,14 +1,14 @@
 package com.example.PAP_API.controller;
 
-import com.example.PAP_API.dto.AppraisalParticipantDto;
-import com.example.PAP_API.dto.AppraisalParticipantSummaryDto;
-import com.example.PAP_API.dto.SelfAppraisalAnswerDto;
-import com.example.PAP_API.dto.UserDto;
+import com.example.PAP_API.dto.*;
 import com.example.PAP_API.mappers.AppraisalParticipantMapper;
 import com.example.PAP_API.model.AppraisalParticipant;
+import com.example.PAP_API.services.ReportPdfService;
 import com.example.PAP_API.services.ReportingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.ByteArrayInputStream;
 import java.util.List;
 
 @RestController
@@ -27,6 +28,9 @@ public class ReportingController {
 
     @Autowired
     private AppraisalParticipantMapper appraisalParticipantMapper;
+
+    @Autowired
+    private ReportPdfService pdfService;
 
     @GetMapping("/{appraisalId}")
     public ResponseEntity<List<AppraisalParticipantDto>> getParticipantsForReview(
@@ -85,5 +89,41 @@ public class ReportingController {
         return ResponseEntity.ok(answers);
     }
 
+    @GetMapping("/{appraisalId}/participants")
+    public ResponseEntity<List<AppraisalParticipantDto>> getAppraisalParticipants(@PathVariable Long appraisalId) {
+        List<AppraisalParticipant> participants = reportingService.getParticipantsByAppraisal(appraisalId);
+        return ResponseEntity.ok(appraisalParticipantMapper.toDto(participants));
+    }
+
+    @GetMapping("/participant/{participantId}")
+    public ParticipantReportDto getParticipantReport(@PathVariable Long participantId) {
+        return reportingService.getParticipantReport(participantId);
+    }
+
+    @GetMapping("/participant/{participantId}/download")
+    public ResponseEntity<byte[]> downloadParticipantReport(@PathVariable Long participantId) {
+        // 1️⃣ Get report data (from existing method)
+        ParticipantReportDto reportDto = reportingService.getParticipantReport(participantId);
+
+        // 2️⃣ Generate PDF
+        ByteArrayInputStream pdfStream = pdfService.generateParticipantReport(reportDto);
+
+        // 3️⃣ Return as downloadable file
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=AppraisalReport_" + reportDto.getEmployeeName() + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfStream.readAllBytes());
+    }
+
+    @GetMapping("/participant/{participantId}/download-styled")
+    public ResponseEntity<byte[]> downloadStyledReport(@PathVariable Long participantId) {
+        ParticipantReportDto reportDto = reportingService.getParticipantReport(participantId);
+        ByteArrayInputStream pdfStream = pdfService.generateParticipantReportStyled(reportDto);
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=AppraisalReport_" + reportDto.getEmployeeName() + ".pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdfStream.readAllBytes());
+    }
 
 }

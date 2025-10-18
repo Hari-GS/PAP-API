@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface AppraisalQuestionRepository extends JpaRepository<AppraisalQuestion, Long> {
+    int countByParticipantId(Long id);
 }

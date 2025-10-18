@@ -20,6 +20,7 @@ public class AppraisalParticipant {
     private String designation;
     private String managerName;
     private Statuses selfAppraisalStatus= Statuses.NOT_STARTED;
+    private Statuses reviewAppraisalStatus= Statuses.NOT_STARTED;
     private Long totalQns;
     private Integer totalQnsAnswered=0;
 

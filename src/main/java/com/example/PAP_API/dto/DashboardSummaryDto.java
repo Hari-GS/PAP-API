@@ -6,8 +6,8 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class DashboardSummaryDto {
-    private int totalEmployees;
-    private int completedReviews;
-    private int pendingReviews;
-    private double averageScore;
+    private long totalEmployees;
+    private long selfReviewsCompleted;
+    private long reportingReviewsCompleted;
+    private long totalReportingReviewsToDo;
 }

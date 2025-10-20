@@ -32,6 +32,10 @@ public class AppraisalParticipant {
     private List<AppraisalQuestion> questions = new ArrayList<>();
 
     @ManyToOne
+    @JoinColumn(name = "participant_id")
+    private NewEmployee participant;
+
+    @ManyToOne
     @JoinColumn(name = "reporting_person_id")
     private NewEmployee reportingPerson;
 }

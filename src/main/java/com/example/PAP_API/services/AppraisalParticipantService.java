@@ -14,11 +14,11 @@ public class AppraisalParticipantService {
         this.participantRepo = participantRepo;
     }
 
-    public Optional<AppraisalParticipant> getCurrentAppraisalForEmployee(String employeeId) {
-        Optional<AppraisalParticipant> active = participantRepo.findActiveAppraisalByEmployeeId(employeeId);
+    public Optional<AppraisalParticipant> getCurrentAppraisalForEmployee(Long id) {
+        Optional<AppraisalParticipant> active = participantRepo.findActiveAppraisalByEmployeeId(id);
         if (active.isPresent()) {
             return active;
         }
-        return participantRepo.findLatestAppraisalByEmployeeId(employeeId);
+        return participantRepo.findLatestAppraisalByEmployeeId(id);
     }
 }

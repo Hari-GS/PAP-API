@@ -17,6 +17,9 @@ public class EmployeeAppraisalSummaryDto {
     private String endDate;
     private String stage;
 
+    private String reportingManagerName;
+    private String reportingManagerDesignation;
+
     private String createdAt;
     private String createdBy;
 

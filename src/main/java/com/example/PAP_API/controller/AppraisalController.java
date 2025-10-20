@@ -45,9 +45,7 @@ public class AppraisalController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AppraisalDto> getAppraisalById(@PathVariable Long id) {
-        Long hrId = userContextService.getCurrentUserId();
-
-        return appraisalService.getAppraisalById(id, hrId)
+        return appraisalService.getAppraisalById(id)
                 .map(ResponseEntity::ok)
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }

@@ -11,4 +11,7 @@ public class NewEmployeeDto {
     private String email;
     private String token;
     private String role;
+    private String myHrManager;
+    private String reportingPerson;
+    private String reportingPersonDesignation;
 }

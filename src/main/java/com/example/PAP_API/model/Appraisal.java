@@ -20,6 +20,9 @@ public class Appraisal {
     private LocalDate startDate;
     private LocalDate selfAppraisalEndDate;
     private LocalDate endDate;
+
+    @Lob
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
     @Enumerated(EnumType.STRING)

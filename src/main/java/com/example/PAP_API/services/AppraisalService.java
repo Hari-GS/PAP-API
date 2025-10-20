@@ -3,12 +3,10 @@ package com.example.PAP_API.services;
 import com.example.PAP_API.dto.AppraisalDto;
 import com.example.PAP_API.enums.Stage;
 import com.example.PAP_API.mappers.AppraisalMapper;
-import com.example.PAP_API.model.Appraisal;
-import com.example.PAP_API.model.AppraisalParticipant;
-import com.example.PAP_API.model.AppraisalQuestion;
-import com.example.PAP_API.model.HRManager;
+import com.example.PAP_API.model.*;
 import com.example.PAP_API.repository.AppraisalRepository;
 import com.example.PAP_API.repository.HRManagerRepository;
+import com.example.PAP_API.repository.NewEmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +25,12 @@ public class AppraisalService {
     @Autowired
     HRManagerRepository hrManagerRepository;
 
+    @Autowired
+    NewEmployeeRepository newEmployeeRepository;
+
+    @Autowired
+    UserContextService userContextService;
+
     public Appraisal saveAppraisal(AppraisalDto dto, Long hrId) {
         Appraisal appraisal = appraisalMapper.toEntity(dto);
 
@@ -37,6 +41,14 @@ public class AppraisalService {
         if (appraisal.getParticipants() != null) {
             for (AppraisalParticipant participant : appraisal.getParticipants()) {
                 participant.setAppraisal(appraisal);
+
+                NewEmployee employee = newEmployeeRepository
+                        .findByEmployeeIdAndHrManagerId(participant.getEmployeeId(), hrId)
+                        .orElseThrow(() -> new RuntimeException(
+                                "Employee not found for ID: " + participant.getEmployeeId() + " under HR ID: " + hrId
+                        ));
+                participant.setParticipant(employee);
+
                 participant.setTotalQns(participant.getQuestions().stream().count());
                 if (participant.getQuestions() != null) {
                     for (AppraisalQuestion question : participant.getQuestions()) {
@@ -55,8 +67,8 @@ public class AppraisalService {
         return appraisalRepository.findByHrManagerId(hrId);
     }
 
-    public Optional<AppraisalDto> getAppraisalById(Long id, Long hrId) {
-        return appraisalRepository.findByIdAndHrManagerId(id, hrId)
+    public Optional<AppraisalDto> getAppraisalById(Long id) {
+        return appraisalRepository.findById(id)
                 .map(appraisalMapper::toDto);
     }
 

@@ -40,14 +40,16 @@ public interface AppraisalParticipantRepository extends JpaRepository<AppraisalP
 
     // Find the active appraisal for the employee
     @Query("SELECT ap FROM AppraisalParticipant ap " +
-            "WHERE ap.employeeId = :employeeId " +
+            "WHERE ap.participant.id = :id " +
             "AND ap.appraisal.stage <> 'CLOSED' " +
             "ORDER BY ap.appraisal.startDate DESC LIMIT 1")
-    Optional<AppraisalParticipant> findActiveAppraisalByEmployeeId(String employeeId);
+    Optional<AppraisalParticipant> findActiveAppraisalByEmployeeId(Long id);
 
     // Find the most recent appraisal if no active one
     @Query("SELECT ap FROM AppraisalParticipant ap " +
-            "WHERE ap.employeeId = :employeeId " +
+            "WHERE ap.participant.id = :id " +
             "ORDER BY ap.appraisal.endDate DESC LIMIT 1")
-    Optional<AppraisalParticipant> findLatestAppraisalByEmployeeId(String employeeId);
+    Optional<AppraisalParticipant> findLatestAppraisalByEmployeeId(Long id);
+
+    List<AppraisalParticipant> findByParticipantId(Long id);
 }

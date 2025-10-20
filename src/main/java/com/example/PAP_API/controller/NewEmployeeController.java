@@ -1,10 +1,12 @@
 package com.example.PAP_API.controller;
 
 import com.example.PAP_API.dto.*;
+import com.example.PAP_API.exception.ResourceNotFoundException;
 import com.example.PAP_API.mappers.NewEmployeeMapper;
 import com.example.PAP_API.mappers.UserMapper;
 import com.example.PAP_API.model.Employee;
 import com.example.PAP_API.model.NewEmployee;
+import com.example.PAP_API.repository.NewEmployeeRepository;
 import com.example.PAP_API.services.NewEmployeeService;
 import com.example.PAP_API.services.UserContextService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.rmi.NoSuchObjectException;
 import java.util.List;
 
 @RestController
@@ -31,6 +34,9 @@ public class NewEmployeeController {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private NewEmployeeRepository newEmployeeRepository;
 
     @GetMapping
     public ResponseEntity<List<NewEmployeeDto>> getAllEmployees() {
@@ -107,4 +113,25 @@ public class NewEmployeeController {
         return ResponseEntity.ok(appraisals);
     }
 
+    @GetMapping("/evaluators")
+    public ResponseEntity<NewEmployeeDto> getMyEvaluators(@AuthenticationPrincipal UserDto employee){
+        NewEmployeeDto dto = new NewEmployeeDto();
+        NewEmployee currentEmployee = newEmployeeRepository.findById(employee.getId())
+                .orElseThrow(()->new ResourceNotFoundException("Employee Not Found"));
+        dto.setMyHrManager(currentEmployee.getHrManager().getName());
+
+        dto.setReportingPerson(
+                currentEmployee.getManager() != null
+                        ? currentEmployee.getManager().getName()
+                        : "_"
+        );
+
+        dto.setReportingPersonDesignation(
+                currentEmployee.getManager() != null
+                        ? currentEmployee.getManager().getDesignation()
+                        : "_"
+        );
+
+        return ResponseEntity.ok(dto);
+    }
 }

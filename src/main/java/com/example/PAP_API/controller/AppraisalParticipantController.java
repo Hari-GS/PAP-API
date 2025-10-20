@@ -6,12 +6,14 @@ import com.example.PAP_API.dto.UserDto;
 import com.example.PAP_API.mappers.AppraisalMapper;
 import com.example.PAP_API.model.Appraisal;
 import com.example.PAP_API.model.AppraisalParticipant;
+import com.example.PAP_API.model.NewEmployee;
 import com.example.PAP_API.repository.AppraisalRepository;
 import com.example.PAP_API.repository.NewEmployeeRepository;
 import com.example.PAP_API.services.AppraisalParticipantService;
 import com.example.PAP_API.services.AppraisalService;
 import com.example.PAP_API.services.UserContextService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,7 +62,12 @@ public class AppraisalParticipantController {
 
     @GetMapping("/current-participant")
     public ResponseEntity<EmployeeAppraisalSummaryDto> getCurrentAppraisalForLoggedInEmployee() {
-        Optional<AppraisalParticipant> appraisalParticipant = participantService.getCurrentAppraisalForEmployee(newEmployeeRepository.findById(userContextService.getCurrentUserId()).get().getEmployeeId());
+        Optional<AppraisalParticipant> appraisalParticipant = participantService.getCurrentAppraisalForEmployee(newEmployeeRepository.findById(userContextService.getCurrentUserId()).get().getId());
+
+        if (appraisalParticipant.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         Appraisal appraisal = appraisalParticipant.get().getAppraisal();
 
         EmployeeAppraisalSummaryDto dto = new EmployeeAppraisalSummaryDto();
@@ -68,6 +75,20 @@ public class AppraisalParticipantController {
         dto.setSelfAppraisalEndDate(appraisal.getSelfAppraisalEndDate().toString());
         dto.setStatus(appraisalParticipant.get().getSelfAppraisalStatus().toString());
         dto.setAppraisalId(appraisal.getId());
+        dto.setSelfQnsAnswered(appraisalParticipant.get().getTotalQnsAnswered());
+        dto.setTotalSelfQns(appraisalParticipant.get().getTotalQns());
+        dto.setReportingManagerName(
+                appraisalParticipant.get().getReportingPerson() != null
+                        ? appraisalParticipant.get().getReportingPerson().getName()
+                        : "_"
+        );
+
+        dto.setReportingManagerDesignation(
+                appraisalParticipant.get().getReportingPerson() != null
+                        ? appraisalParticipant.get().getReportingPerson().getDesignation()
+                        : "_"
+        );
+        dto.setCreatedBy(appraisal.getHrManager().getName());
 
         return ResponseEntity.ok(dto);
     }

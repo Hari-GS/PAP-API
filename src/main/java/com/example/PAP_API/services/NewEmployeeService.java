@@ -137,7 +137,8 @@ public class NewEmployeeService {
 
     public List<EmployeeAppraisalSummaryDto> getAppraisalsForEmployee(Long id) {
         NewEmployee employee = employeeRepository.findById(id).get();
-        List<AppraisalParticipant> participants = participantRepository.findByEmployeeId(employee.getEmployeeId());
+//        List<AppraisalParticipant> participants = participantRepository.findByEmployeeId(employee.getEmployeeId());
+        List<AppraisalParticipant> participants = participantRepository.findByParticipantId(employee.getId());
 
         return participants.stream().map(p -> {
             Appraisal a = p.getAppraisal();

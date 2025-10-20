@@ -14,6 +14,5 @@ public class AppraisalParticipantDto {
     private String managerId;
     private String selfAppraisalStatus;
     private String reviewAppraisalStatus;
-
     private List<AppraisalQuestionDto> questions;
 }

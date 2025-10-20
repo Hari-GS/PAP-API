@@ -23,6 +23,9 @@ public abstract class AppraisalMapper {
     @Autowired
     protected NewEmployeeRepository newEmployeeRepository;
 
+    @Autowired
+    private NewEmployeeMapper newEmployeeMapper;
+
     public abstract AppraisalDto toDto(Appraisal appraisal);
     public abstract Appraisal toEntity(AppraisalDto dto);
     public abstract List<AppraisalDto> toDtoList(List<Appraisal> appraisals);
@@ -40,7 +43,9 @@ public abstract class AppraisalMapper {
                     participant.setManagerName(
                             employee.getManagerId() != null ? employeeService.getEmployeeById(employee.getManagerId()).getBody().getName() : "N/A"
                     );
-                    participant.setReportingPerson(employee.getManagerId()!= null ? newEmployeeRepository.findByEmployeeId(employee.getManagerId()).get() : null);
+
+                    participant.setReportingPerson(employee.getManagerId()!= null ? newEmployeeMapper.toEntity(employeeService.getEmployeeById(employee.getManagerId()).getBody()) : null);
+
                     participant.setAppraisal(appraisal); // maintain back-reference
                 } else {
                     throw new RuntimeException("Employee not found or service error for ID: " + participant.getEmployeeId());

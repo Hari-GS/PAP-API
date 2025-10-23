@@ -15,4 +15,9 @@ public interface AppraisalRepository extends JpaRepository<Appraisal, Long> {
     List<Appraisal> findByHrManagerIdAndStage(Long hrManagerId, Stage stage);
 
     Optional<Appraisal> findTopByHrManagerIdOrderByEndDateDesc(Long hrId);
+    Optional<Appraisal> findTopByHrManagerIdOrderByCreatedAtDescIdDesc(Long hrId);
+
+
+    // ✅ New method: Get all appraisals except CLOSED
+    List<Appraisal> findByHrManagerIdAndStageNot(Long hrManagerId, Stage stage);
 }

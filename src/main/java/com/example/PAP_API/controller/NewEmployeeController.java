@@ -113,6 +113,18 @@ public class NewEmployeeController {
         return ResponseEntity.ok(appraisals);
     }
 
+    @GetMapping("/active-appraisals")
+    public ResponseEntity<List<EmployeeAppraisalSummaryDto>> getMyActiveAppraisals(@AuthenticationPrincipal UserDto employee) {
+        List<EmployeeAppraisalSummaryDto> appraisals = employeeService.getActiveAppraisalsForEmployee(employee.getId());
+        return ResponseEntity.ok(appraisals);
+    }
+
+    @GetMapping("/closed-appraisals")
+    public ResponseEntity<List<EmployeeAppraisalSummaryDto>> getMyClosedAppraisals(@AuthenticationPrincipal UserDto employee) {
+        List<EmployeeAppraisalSummaryDto> appraisals = employeeService.getClosedAppraisalsForEmployee(employee.getId());
+        return ResponseEntity.ok(appraisals);
+    }
+
     @GetMapping("/evaluators")
     public ResponseEntity<NewEmployeeDto> getMyEvaluators(@AuthenticationPrincipal UserDto employee){
         NewEmployeeDto dto = new NewEmployeeDto();

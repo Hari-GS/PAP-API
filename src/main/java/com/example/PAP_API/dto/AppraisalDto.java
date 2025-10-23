@@ -16,6 +16,7 @@ public class AppraisalDto {
     private String endDate;
     private String description;
     private String createdAt;
+    private String createdBy;
     private Stage stage= Stage.CREATED;
 
     private List<AppraisalParticipantDto> participants;

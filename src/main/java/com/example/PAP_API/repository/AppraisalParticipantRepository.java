@@ -52,4 +52,11 @@ public interface AppraisalParticipantRepository extends JpaRepository<AppraisalP
     Optional<AppraisalParticipant> findLatestAppraisalByEmployeeId(Long id);
 
     List<AppraisalParticipant> findByParticipantId(Long id);
+
+    @Query("SELECT ap FROM AppraisalParticipant ap WHERE ap.participant.id = :id AND ap.appraisal.stage = 'CLOSED'")
+    List<AppraisalParticipant> findClosedAppraisalsByEmployeeId(Long id);
+
+    @Query("SELECT ap FROM AppraisalParticipant ap WHERE ap.participant.id = :id AND ap.appraisal.stage <> 'CLOSED'")
+    List<AppraisalParticipant> findActiveAppraisals(Long id);
+
 }

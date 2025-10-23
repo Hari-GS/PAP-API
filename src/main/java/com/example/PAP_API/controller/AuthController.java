@@ -63,7 +63,8 @@ public class AuthController {
                 .orElseThrow(() -> new AppException("Employee not found", HttpStatus.NOT_FOUND));
 
         if (employee.getPassword() != null) {
-            throw new AppException("Password already set. Please login.", HttpStatus.BAD_REQUEST);
+            //throw new AppException("Password already set. Please login.", HttpStatus.BAD_REQUEST);
+            return ResponseEntity.ok("Password already set. Please login to change password");
         }
 
         employee.setPassword(passwordEncoder.encode(CharBuffer.wrap(dto.getNewPassword())));

@@ -45,9 +45,8 @@ public class AppraisalController {
 
     @GetMapping("/{id}")
     public ResponseEntity<AppraisalDto> getAppraisalById(@PathVariable Long id) {
-        return appraisalService.getAppraisalById(id)
-                .map(ResponseEntity::ok)
-                .orElseGet(() -> ResponseEntity.notFound().build());
+        AppraisalDto dto = appraisalService.getAppraisalById(id);
+        return ResponseEntity.ok(dto);
     }
 
     @PutMapping("/{id}/force-move")
@@ -60,7 +59,7 @@ public class AppraisalController {
     @GetMapping("/recent")
     public ResponseEntity<AppraisalDto> getMostRecentAppraisal() {
         Long hrId = userContextService.getCurrentUserId();
-        Appraisal recent = appraisalRepo.findTopByHrManagerIdOrderByEndDateDesc(hrId)
+        Appraisal recent = appraisalRepo.findTopByHrManagerIdOrderByCreatedAtDescIdDesc(hrId)
                 .orElseThrow(() -> new EntityNotFoundException("No recent appraisals found"));
         return ResponseEntity.ok(appraisalMapper.toDto(recent));
     }

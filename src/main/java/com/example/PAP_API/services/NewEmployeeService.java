@@ -6,6 +6,7 @@ import com.example.PAP_API.mappers.NewEmployeeMapper;
 import com.example.PAP_API.model.*;
 import com.example.PAP_API.repository.*;
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@RequiredArgsConstructor
 @Service
 public class NewEmployeeService {
 
@@ -31,6 +33,9 @@ public class NewEmployeeService {
 
     @Autowired
     UserContextService userContext;
+
+    private final EmailService emailService;
+    private final EmailTemplateService emailTemplateService;
 
     @Autowired
     private AppraisalParticipantRepository participantRepository;
@@ -77,8 +82,16 @@ public class NewEmployeeService {
                     .orElseThrow(() -> new IllegalArgumentException("Manager not found with ID: " + employeeDto.getManagerId()));
             employee.setManager(manager);
         }
+        NewEmployee createdEmployee = employeeRepository.save(employee);
 
-        return employeeRepository.save(employee);
+        //Email Sending
+        String htmlContent = emailTemplateService.getParticipantAddedEmail(
+                createdEmployee.getName(),
+                "http://localhost:3000/sign-up"
+                );
+        emailService.sendHtmlMail(createdEmployee.getEmail(),"You’ve Been Added to CIT Appraisal Portal",htmlContent);
+
+        return createdEmployee;
     }
 
 
@@ -139,6 +152,54 @@ public class NewEmployeeService {
         NewEmployee employee = employeeRepository.findById(id).get();
 //        List<AppraisalParticipant> participants = participantRepository.findByEmployeeId(employee.getEmployeeId());
         List<AppraisalParticipant> participants = participantRepository.findByParticipantId(employee.getId());
+
+        return participants.stream().map(p -> {
+            Appraisal a = p.getAppraisal();
+            EmployeeAppraisalSummaryDto dto = new EmployeeAppraisalSummaryDto();
+            dto.setAppraisalId(a.getId());
+            dto.setTitle(a.getTitle());
+            dto.setStatus(p.getSelfAppraisalStatus().toString());
+            dto.setType(a.getType());
+            dto.setStartDate(a.getStartDate().toString());
+            dto.setSelfAppraisalEndDate(a.getSelfAppraisalEndDate().toString());
+            dto.setEndDate(a.getEndDate().toString());
+            dto.setStage(a.getStage().name());
+            dto.setCreatedAt(a.getCreatedAt().toString());
+            dto.setCreatedBy(a.getHrManager().getName());
+            dto.setTotalSelfQns(p.getTotalQns());
+            dto.setSelfQnsAnswered(p.getTotalQnsAnswered());
+            return dto;
+        }).toList();
+    }
+
+    public List<EmployeeAppraisalSummaryDto> getClosedAppraisalsForEmployee(Long id) {
+        NewEmployee employee = employeeRepository.findById(id).get();
+//        List<AppraisalParticipant> participants = participantRepository.findByEmployeeId(employee.getEmployeeId());
+        List<AppraisalParticipant> participants = participantRepository.findClosedAppraisalsByEmployeeId(id);
+
+        return participants.stream().map(p -> {
+            Appraisal a = p.getAppraisal();
+            EmployeeAppraisalSummaryDto dto = new EmployeeAppraisalSummaryDto();
+            dto.setAppraisalId(a.getId());
+            dto.setTitle(a.getTitle());
+            dto.setStatus(p.getSelfAppraisalStatus().toString());
+            dto.setType(a.getType());
+            dto.setStartDate(a.getStartDate().toString());
+            dto.setSelfAppraisalEndDate(a.getSelfAppraisalEndDate().toString());
+            dto.setEndDate(a.getEndDate().toString());
+            dto.setStage(a.getStage().name());
+            dto.setCreatedAt(a.getCreatedAt().toString());
+            dto.setCreatedBy(a.getHrManager().getName());
+            dto.setTotalSelfQns(p.getTotalQns());
+            dto.setSelfQnsAnswered(p.getTotalQnsAnswered());
+            return dto;
+        }).toList();
+    }
+
+    public List<EmployeeAppraisalSummaryDto> getActiveAppraisalsForEmployee(Long id) {
+        NewEmployee employee = employeeRepository.findById(id).get();
+//        List<AppraisalParticipant> participants = participantRepository.findByEmployeeId(employee.getEmployeeId());
+        List<AppraisalParticipant> participants = participantRepository.findActiveAppraisals(id);
 
         return participants.stream().map(p -> {
             Appraisal a = p.getAppraisal();

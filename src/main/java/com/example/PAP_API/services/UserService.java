@@ -31,6 +31,9 @@ public class UserService {
 
     private final NewEmployeeMapper newEmployeeMapper;
 
+    private final EmailService emailService;
+    private final EmailTemplateService emailTemplateService;
+
     @Autowired
     private OrganizationRepository organizationRepository;
 
@@ -64,6 +67,11 @@ public class UserService {
         user.setOrganization(org); // Set the relationship
 
         HRManager savedUser = userRepository.save(user);
+
+        // --- Send Welcome Email ---
+        String htmlContent = emailTemplateService.getWelcomeEmail(savedUser.getName());
+        emailService.sendHtmlMail(savedUser.getEmail(), "Welcome to Performance Appraisal Platform", htmlContent);
+
         return userMapper.toUserDto(savedUser);
     }
 

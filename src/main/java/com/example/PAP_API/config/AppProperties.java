@@ -14,6 +14,9 @@ public class AppProperties {
     @Value("${spring.mail.from}")
     private String emailFrom;
 
-    @Value("app.frontend.origin")
+    @Value("${app.frontend.origin}")
     private String allowedFrontendOrigin;
+
+    @Value("${app.backend.url}")
+    private String backendUrl;
 }

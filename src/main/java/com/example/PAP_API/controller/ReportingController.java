@@ -1,13 +1,17 @@
 package com.example.PAP_API.controller;
 
 import com.example.PAP_API.dto.*;
+import com.example.PAP_API.exception.AppException;
 import com.example.PAP_API.mappers.AppraisalParticipantMapper;
 import com.example.PAP_API.model.AppraisalParticipant;
+import com.example.PAP_API.model.NewEmployee;
+import com.example.PAP_API.repository.NewEmployeeRepository;
 import com.example.PAP_API.services.ReportPdfService;
 import com.example.PAP_API.services.ReportingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -32,6 +36,9 @@ public class ReportingController {
     @Autowired
     private ReportPdfService pdfService;
 
+    @Autowired
+    private NewEmployeeRepository newEmployeeRepository;
+
     @GetMapping("/{appraisalId}")
     public ResponseEntity<List<AppraisalParticipantDto>> getParticipantsForReview(
             @PathVariable Long appraisalId,
@@ -51,7 +58,17 @@ public class ReportingController {
             @PathVariable Long appraisalId,
             @AuthenticationPrincipal UserDto userDetails) {
 
-        Long reportingPersonId = userDetails.getId(); // from JWT
+        Long id;
+
+        if ("hr".equalsIgnoreCase(userDetails.getRole())) {
+            NewEmployee newEmployee = newEmployeeRepository.findByEmail(userDetails.getEmail())
+                    .orElseThrow(() -> new AppException("Employee not found", HttpStatus.NOT_FOUND));
+            id = newEmployee.getId();
+        } else {
+            id = userDetails.getId();
+        }
+
+        Long reportingPersonId = id; // from JWT
         List<AppraisalParticipant> participants =
                 reportingService.getParticipantsForReporting(appraisalId, reportingPersonId);
 
@@ -100,28 +117,13 @@ public class ReportingController {
         return reportingService.getParticipantReport(participantId);
     }
 
-    @GetMapping("/participant/{participantId}/download")
-    public ResponseEntity<byte[]> downloadParticipantReport(@PathVariable Long participantId) {
-        // 1️⃣ Get report data (from existing method)
-        ParticipantReportDto reportDto = reportingService.getParticipantReport(participantId);
-
-        // 2️⃣ Generate PDF
-        ByteArrayInputStream pdfStream = pdfService.generateParticipantReport(reportDto);
-
-        // 3️⃣ Return as downloadable file
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=AppraisalReport_" + reportDto.getEmployeeName() + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfStream.readAllBytes());
-    }
-
     @GetMapping("/participant/{participantId}/download-styled")
     public ResponseEntity<byte[]> downloadStyledReport(@PathVariable Long participantId) {
         ParticipantReportDto reportDto = reportingService.getParticipantReport(participantId);
-        ByteArrayInputStream pdfStream = pdfService.generateParticipantReportStyled(reportDto);
+        ByteArrayInputStream pdfStream = pdfService.generateParticipantReportStyled2(reportDto);
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=AppraisalReport_" + reportDto.getEmployeeName() + ".pdf")
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + reportDto.getEmployeeName() + "_" + reportDto.getEmployeeId() +"_AppraisalReport.pdf")
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdfStream.readAllBytes());
     }

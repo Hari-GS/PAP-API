@@ -5,9 +5,11 @@ import com.example.PAP_API.dto.ReportingPersonDto;
 import com.example.PAP_API.dto.SelfAppraisalAnswerDto;
 import com.example.PAP_API.dto.UserDto;
 import com.example.PAP_API.enums.Statuses;
+import com.example.PAP_API.exception.AppException;
 import com.example.PAP_API.mappers.SelfAppraisalAnswerMapper;
 import com.example.PAP_API.model.AppraisalParticipant;
 import com.example.PAP_API.model.AppraisalQuestion;
+import com.example.PAP_API.model.NewEmployee;
 import com.example.PAP_API.model.SelfAppraisalAnswer;
 import com.example.PAP_API.repository.AppraisalAnswerRepository;
 import com.example.PAP_API.repository.AppraisalParticipantRepository;
@@ -15,6 +17,7 @@ import com.example.PAP_API.repository.AppraisalQuestionRepository;
 import com.example.PAP_API.repository.NewEmployeeRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,8 +49,18 @@ public class SelfAppraisalService {
 
     public void saveAnswers(Long appraisalId, UserDto userParticipant, List<SelfAppraisalAnswerDto> answerDtos) {
 
+        Long id;
+
+        if ("hr".equalsIgnoreCase(userParticipant.getRole())) {
+            NewEmployee newEmployee = employeeRepository.findByEmail(userParticipant.getEmail())
+                    .orElseThrow(() -> new AppException("Employee not found", HttpStatus.NOT_FOUND));
+            id = newEmployee.getId();
+        } else {
+            id = userParticipant.getId();
+        }
+
         // Step 1: Get employeeId from logged-in user
-        String empId = employeeRepository.findById(userParticipant.getId())
+        String empId = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"))
                 .getEmployeeId();
 
@@ -101,7 +114,17 @@ public class SelfAppraisalService {
     }
 
     public List<AppraisalQuestionDto> getSelfAppraisalQuestions(Long appraisalId, UserDto userparticipant) {
-        String employeeId = employeeRepository.findById(userparticipant.getId())
+        Long id;
+
+        if ("hr".equalsIgnoreCase(userparticipant.getRole())) {
+            NewEmployee newEmployee = employeeRepository.findByEmail(userparticipant.getEmail())
+                    .orElseThrow(() -> new AppException("Employee not found", HttpStatus.NOT_FOUND));
+            id = newEmployee.getId();
+        } else {
+            id = userparticipant.getId();
+        }
+
+        String employeeId = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"))
                 .getEmployeeId();
 
@@ -121,7 +144,17 @@ public class SelfAppraisalService {
     }
 
     public List<SelfAppraisalAnswerDto> getAnswersByParticipant(Long appraisalId, UserDto userParticipant) {
-        String empId = employeeRepository.findById(userParticipant.getId())
+        Long id;
+
+        if ("hr".equalsIgnoreCase(userParticipant.getRole())) {
+            NewEmployee newEmployee = employeeRepository.findByEmail(userParticipant.getEmail())
+                    .orElseThrow(() -> new AppException("Employee not found", HttpStatus.NOT_FOUND));
+            id = newEmployee.getId();
+        } else {
+            id = userParticipant.getId();
+        }
+
+        String empId = employeeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Employee not found"))
                 .getEmployeeId();
         return selfAppraisalAnswerMapper.toDTOList(answerRepo.findByParticipant_EmployeeIdAndParticipant_AppraisalId(empId, appraisalId));

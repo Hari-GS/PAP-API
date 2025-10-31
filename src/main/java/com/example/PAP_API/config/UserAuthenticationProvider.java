@@ -58,12 +58,31 @@ public class UserAuthenticationProvider {
         userDto.setToken(decoded.getToken());
         userDto.setRole(decoded.getClaim("role").asString());
 
-        System.out.println(userDto);
-
         SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + userDto.getRole().toUpperCase());
         return new UsernamePasswordAuthenticationToken(userDto, null, List.of(authority));
     }
 
+    public String generateInviteToken(String email, String employeeId, String name, Long hrId, Long organizationId) {
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + 24 * 60 * 60 * 1000L); // 24 hours validity
+
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+        return JWT.create()
+                .withSubject(email)
+                .withClaim("employeeId",employeeId)
+                .withClaim("name", name)
+                .withClaim("hrId", hrId)
+                .withClaim("organizationId", organizationId)
+                .withIssuedAt(now)
+                .withExpiresAt(validity)
+                .sign(algorithm);
+    }
+
+    public DecodedJWT validateInviteToken(String token) {
+        Algorithm algorithm = Algorithm.HMAC256(secretKey);
+        JWTVerifier verifier = JWT.require(algorithm).build();
+        return verifier.verify(token);
+    }
 
 
 }

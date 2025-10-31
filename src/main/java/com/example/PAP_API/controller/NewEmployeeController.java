@@ -1,15 +1,18 @@
 package com.example.PAP_API.controller;
 
 import com.example.PAP_API.dto.*;
+import com.example.PAP_API.exception.AppException;
 import com.example.PAP_API.exception.ResourceNotFoundException;
 import com.example.PAP_API.mappers.NewEmployeeMapper;
 import com.example.PAP_API.mappers.UserMapper;
 import com.example.PAP_API.model.Employee;
 import com.example.PAP_API.model.NewEmployee;
+import com.example.PAP_API.repository.HRManagerRepository;
 import com.example.PAP_API.repository.NewEmployeeRepository;
 import com.example.PAP_API.services.NewEmployeeService;
 import com.example.PAP_API.services.UserContextService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -53,9 +56,22 @@ public class NewEmployeeController {
         // Assuming you stored your UserDto in the principal during authentication
         ;
         Long hrId = userContext.getCurrentUserId();
-        System.out.println(userContext.getCurrentUser().toString());
         List<NewEmployeeSummaryDto> employees = employeeService.getAllEmployeeSummaries(hrId);
         return ResponseEntity.ok(employees);
+    }
+
+    @GetMapping("/inactive/summary")
+    public ResponseEntity<List<NewEmployeeSummaryDto>> getAllInactiveEmployeesSummaries() {
+        // Assuming you stored your UserDto in the principal during authentication
+        ;
+        Long hrId = userContext.getCurrentUserId();
+        List<NewEmployeeSummaryDto> employees = employeeService.getAllInactiveEmployeeSummaries(hrId);
+        return ResponseEntity.ok(employees);
+    }
+
+    @PutMapping("/active/{employeeId}")
+    public ResponseEntity<NewEmployeeDto> activeEmployee(@PathVariable String employeeId) {
+        return employeeService.activeEmployee(employeeId);
     }
 
     @PostMapping
@@ -115,9 +131,20 @@ public class NewEmployeeController {
 
     @GetMapping("/active-appraisals")
     public ResponseEntity<List<EmployeeAppraisalSummaryDto>> getMyActiveAppraisals(@AuthenticationPrincipal UserDto employee) {
-        List<EmployeeAppraisalSummaryDto> appraisals = employeeService.getActiveAppraisalsForEmployee(employee.getId());
+        Long id;
+
+        if ("hr".equalsIgnoreCase(employee.getRole())) {
+            NewEmployee newEmployee = newEmployeeRepository.findByEmail(employee.getEmail())
+                    .orElseThrow(() -> new AppException("Employee not found", HttpStatus.NOT_FOUND));
+            id = newEmployee.getId();
+        } else {
+            id = employee.getId();
+        }
+
+        List<EmployeeAppraisalSummaryDto> appraisals = employeeService.getActiveAppraisalsForEmployee(id);
         return ResponseEntity.ok(appraisals);
     }
+
 
     @GetMapping("/closed-appraisals")
     public ResponseEntity<List<EmployeeAppraisalSummaryDto>> getMyClosedAppraisals(@AuthenticationPrincipal UserDto employee) {

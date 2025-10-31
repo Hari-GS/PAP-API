@@ -21,5 +21,7 @@ public class SignUpDto {
     @NotEmpty
     private String password;
 
-    private String organizationPublicId;
+    private String organizationId;
+
+    private String employeeId;
 }

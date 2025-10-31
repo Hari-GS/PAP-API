@@ -140,5 +140,84 @@ public class EmailTemplateService {
                 "Best regards,\nTeam CIT";
     }
 
+    public String getOrganizationVerificationEmailTemplate(String orgName, String verificationLink) {
+        return """
+            <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <h2 style="color: #2b6cb0;">Welcome to the Appraisal Portal!</h2>
+                <p>Dear <b>%s</b>,</p>
+                <p>Thank you for registering your organization on CIT's appraisal portal</p>
+                <p>To complete your registration, please verify your organization by clicking the button below:</p>
+
+                <p style="text-align: center; margin: 25px 0;">
+                    <a href="%s" 
+                       style="background-color: #2b6cb0; color: white; padding: 10px 18px; 
+                              text-decoration: none; border-radius: 6px; font-weight: bold;">
+                        Verify Organization
+                    </a>
+                </p>
+
+                <p>If you didn’t request this, please ignore this email.</p>
+
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;"/>
+
+                <p style="font-size: 13px; color: #555;">
+                    Best regards,<br/>
+                    <b>Team CIT</b><br/>
+                </p>
+            </body>
+            </html>
+            """.formatted(orgName, verificationLink);
+    }
+
+    public String getOrganizationVerifiedEmailTemplate(String orgName, String organizationId) {
+        return """
+        <html>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #2b6cb0;">Organization Verified Successfully!</h2>
+            
+            <p>Dear <b>%s</b>,</p>
+            
+            <p>Congratulations! Your organization has been successfully verified on CIT's Appraisal Portal.</p>
+            
+            <p>To allow your HR team to create their accounts, please share the following <b>Organization ID</b> with them:</p>
+            
+            <p style="text-align: center; margin: 25px 0;">
+                <span style="background-color: #e2e8f0; color: #2b6cb0; padding: 10px 18px; 
+                             border-radius: 6px; font-weight: bold; font-size: 16px;">
+                    %s
+                </span>
+            </p>
+            
+            <p>Your HR managers can now use this Organization ID during signup to register their accounts and start managing participants.</p>
+            
+            <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;"/>
+            
+            <p style="font-size: 13px; color: #555;">
+                Best regards,<br/>
+                <b>Team CIT</b><br/>
+            </p>
+        </body>
+        </html>
+        """.formatted(orgName, organizationId);
+    }
+
+    public String getParticipantInviteEmail(String employeeName, String hrName, String orgName, String signupUrl) {
+        return """
+    <html>
+      <body style="font-family: Arial, sans-serif; color: #333;">
+        <h2>Hello %s,</h2>
+        <p>You’ve been added to <b>%s</b> Appraisal Portal by <b>%s</b>.</p>
+        <p>Click below to complete your registration:</p>
+        <a href="%s" 
+           style="display:inline-block; padding:10px 20px; background-color:#ff9700; color:white; text-decoration:none; border-radius:5px;">
+           Complete Signup
+        </a>
+        <p>This link will expire in 24 hours for security reasons.</p>
+      </body>
+    </html>
+    """.formatted(employeeName, orgName, hrName, signupUrl);
+    }
+
 
 }

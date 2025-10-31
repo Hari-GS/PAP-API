@@ -33,4 +33,6 @@ public class HRManager {
     @ManyToOne
     @JoinColumn(name = "organization_id")
     private Organization organization;
+
+    private String employeeId;
 }

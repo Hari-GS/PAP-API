@@ -67,48 +67,48 @@ import java.util.Arrays;
     @Configuration
     @EnableWebMvc
     public class WebConfig {
-        private static final Long MAX_AGE = 3600L;
-        private static final int CORS_FILTER_ORDER = -102;
-        @Autowired
-        private AppProperties appProperties;
-        @Bean
-        public FilterRegistrationBean corsFilter() {
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            CorsConfiguration config = new CorsConfiguration();
-            config.setAllowCredentials(true);
-            // Allow multiple origins if needed
-            config.addAllowedOrigin(appProperties.getAllowedFrontendOrigin());
-            // Add localhost for development if needed
-            // config.addAllowedOrigin("http://localhost:3000");
-            // Allow ALL headers for preflight
-            config.setAllowedHeaders(Arrays.asList(
-                    HttpHeaders.AUTHORIZATION,
-                    HttpHeaders.CONTENT_TYPE,
-                    HttpHeaders.ACCEPT,
-                    HttpHeaders.ORIGIN,
-                    "X-Requested-With",
-                    "Access-Control-Request-Method",
-                    "Access-Control-Request-Headers"
-            ));
-            // Allow ALL methods including OPTIONS (crucial for preflight)
-            config.setAllowedMethods(Arrays.asList(
-                    HttpMethod.GET.name(),
-                    HttpMethod.POST.name(),
-                    HttpMethod.PUT.name(),
-                    HttpMethod.DELETE.name(),
-                    HttpMethod.OPTIONS.name(),  // THIS IS MISSING AND CAUSING THE ISSUE
-                    HttpMethod.PATCH.name()
-            ));
-            // Expose headers if needed
-            config.setExposedHeaders(Arrays.asList(
-                    HttpHeaders.AUTHORIZATION,
-                    HttpHeaders.CONTENT_DISPOSITION
-            ));
-            config.setMaxAge(MAX_AGE);
-            source.registerCorsConfiguration("/**", config);
-            FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-            // should be set order to -100 because we need to CorsFilter before SpringSecurityFilter
-            bean.setOrder(CORS_FILTER_ORDER);
-            return bean;
-        }
+//        private static final Long MAX_AGE = 3600L;
+//        private static final int CORS_FILTER_ORDER = -102;
+//        @Autowired
+//        private AppProperties appProperties;
+//        @Bean
+//        public FilterRegistrationBean corsFilter() {
+//            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//            CorsConfiguration config = new CorsConfiguration();
+//            config.setAllowCredentials(true);
+//            // Allow multiple origins if needed
+//            config.addAllowedOrigin(appProperties.getAllowedFrontendOrigin());
+//            // Add localhost for development if needed
+//            // config.addAllowedOrigin("http://localhost:3000");
+//            // Allow ALL headers for preflight
+//            config.setAllowedHeaders(Arrays.asList(
+//                    HttpHeaders.AUTHORIZATION,
+//                    HttpHeaders.CONTENT_TYPE,
+//                    HttpHeaders.ACCEPT,
+//                    HttpHeaders.ORIGIN,
+//                    "X-Requested-With",
+//                    "Access-Control-Request-Method",
+//                    "Access-Control-Request-Headers"
+//            ));
+//            // Allow ALL methods including OPTIONS (crucial for preflight)
+//            config.setAllowedMethods(Arrays.asList(
+//                    HttpMethod.GET.name(),
+//                    HttpMethod.POST.name(),
+//                    HttpMethod.PUT.name(),
+//                    HttpMethod.DELETE.name(),
+//                    HttpMethod.OPTIONS.name(),  // THIS IS MISSING AND CAUSING THE ISSUE
+//                    HttpMethod.PATCH.name()
+//            ));
+//            // Expose headers if needed
+//            config.setExposedHeaders(Arrays.asList(
+//                    HttpHeaders.AUTHORIZATION,
+//                    HttpHeaders.CONTENT_DISPOSITION
+//            ));
+//            config.setMaxAge(MAX_AGE);
+//            source.registerCorsConfiguration("/**", config);
+//            FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+//            // should be set order to -100 because we need to CorsFilter before SpringSecurityFilter
+//            bean.setOrder(CORS_FILTER_ORDER);
+//            return bean;
+//        }
     }

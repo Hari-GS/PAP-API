@@ -12,6 +12,7 @@ public class ParticipantReportDto {
     private String designation;
     private String managerName;
     private String appraisalTitle;
+    private String appraisalType;
     private String appraisalStage;
 
     private List<ReviewAnswerDto> selfReview;

@@ -2,12 +2,17 @@ package com.example.PAP_API.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "new_employees")
 @Data
+@SQLDelete(sql = "UPDATE new_employees SET status = 'INACTIVE' WHERE id = ?")
+@Where(clause = "status <> 'INACTIVE'")
 public class NewEmployee {
 
     @Id
@@ -28,7 +33,13 @@ public class NewEmployee {
 
     private String password;
 
-    // Self-reference to manager (One manager can manage many employees)
+    @Column(length = 512)
+    private String signupToken;
+
+    @Column(nullable = false)
+    private String status; // INVITED, ACTIVE, INACTIVE, etc.
+    private LocalDateTime tokenExpiry;
+
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private NewEmployee manager;
@@ -38,9 +49,10 @@ public class NewEmployee {
     private Organization organization;
 
     @ManyToOne
-    @JoinColumn(name = "hr_manager_id", nullable = false) // foreign key column in employees table
+    @JoinColumn(name = "hr_manager_id", nullable = false)
     private HRManager hrManager;
 
+    private Boolean isDirector;
     private LocalDate dateOfBirth;
     private LocalDate dateOfJoining;
     private String gender;

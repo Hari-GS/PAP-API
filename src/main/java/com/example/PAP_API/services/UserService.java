@@ -17,6 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.nio.CharBuffer;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -33,6 +34,7 @@ public class UserService {
 
     private final EmailService emailService;
     private final EmailTemplateService emailTemplateService;
+
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -52,14 +54,22 @@ public class UserService {
 
     public UserDto register(SignUpDto userDto) {
         Optional<HRManager> optionalUser = userRepository.findByEmail(userDto.getEmail());
+        Optional<NewEmployee> optionalEmployee = newEmployeeRepository.findByEmail(userDto.getEmail());
+
+        if (optionalEmployee.isPresent()) {
+            throw new AppException("Email already exists as employee", HttpStatus.BAD_REQUEST);
+        }
 
         if (optionalUser.isPresent()) {
             throw new AppException("Login already exists", HttpStatus.BAD_REQUEST);
         }
 
         // Fetch organization using publicId
-        Organization org = organizationRepository.findByPublicId(userDto.getOrganizationPublicId())
+        Organization org = organizationRepository.findByOrganizationId(userDto.getOrganizationId())
                 .orElseThrow(() -> new AppException("Organization not found", HttpStatus.BAD_REQUEST));
+        if (!"VERIFIED".equals(org.getStatus())) {
+            throw new AppException("Organization not verified yet", HttpStatus.BAD_REQUEST);
+        }
 
         // Map DTO to entity
         HRManager user = userMapper.signUpToUser(userDto);
@@ -67,6 +77,17 @@ public class UserService {
         user.setOrganization(org); // Set the relationship
 
         HRManager savedUser = userRepository.save(user);
+
+        NewEmployee employee = new NewEmployee();
+        employee.setEmployeeId(savedUser.getEmployeeId());
+        employee.setName(savedUser.getName());
+        employee.setDesignation("HR Manager");
+        employee.setEmail(savedUser.getEmail());
+        employee.setPassword(savedUser.getPassword());
+        employee.setStatus("ACTIVE");
+        employee.setHrManager(savedUser);
+        employee.setOrganization(savedUser.getOrganization());
+        newEmployeeRepository.save(employee);
 
         // --- Send Welcome Email ---
         String htmlContent = emailTemplateService.getWelcomeEmail(savedUser.getName());
@@ -129,7 +150,5 @@ public class UserService {
 
         throw new AppException("User not found", HttpStatus.NOT_FOUND);
     }
-
-
 
 }

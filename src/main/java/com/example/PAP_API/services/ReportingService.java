@@ -67,6 +67,7 @@ public class ReportingService {
         dto.setDesignation(participant.getDesignation());
         dto.setManagerName(participant.getManagerName());
         dto.setAppraisalTitle(appraisal.getTitle());
+        dto.setAppraisalType(appraisal.getType());
         dto.setAppraisalStage(appraisal.getStage().name());
 
         // 3️⃣ Fetch answers for this participant

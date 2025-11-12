@@ -14,4 +14,5 @@ public class NewEmployeeDto {
     private String myHrManager;
     private String reportingPerson;
     private String reportingPersonDesignation;
+    private Boolean isDirector;
 }

@@ -66,9 +66,15 @@ public class NewEmployeeService {
     }
 
     public ResponseEntity<NewEmployeeDto> getEmployeeById(String employeeId) {
-        Long hrManagerId = userContext.getCurrentUserId(); // make sure UserContextService is injected
+        Long hrId;
+        UserDto user = userContext.getCurrentUser();
+        if(user.getRole().equals("director")){
+            hrId = employeeRepository.findById(user.getId()).get().getHrManager().getId();
+        }else{
+            hrId = userContext.getCurrentUserId();
+        }
 
-        NewEmployee employee = employeeRepository.findByEmployeeIdAndHrManagerId(employeeId, hrManagerId)
+        NewEmployee employee = employeeRepository.findByEmployeeIdAndHrManagerId(employeeId, hrId)
                 .orElseThrow(() -> new ResourceNotFoundException("Employee with ID " + employeeId + " not found or access denied."));
 
         return ResponseEntity.ok(employeeMapper.toDTO(employee));
@@ -184,16 +190,16 @@ public class NewEmployeeService {
     }
 
     public List<NewEmployeeSummaryDto> getAllEmployeeSummaries(Long hrId) {
-        List<NewEmployee> employees = employeeRepository.findByHrManagerId(hrId);
+        List<NewEmployee> employees = employeeRepository.findActiveEmployeesByHrManagerIdNative(hrId);
         return employeeMapper.toSummaryDTOs(employees);
     }
 
     public List<NewEmployeeSummaryDto> getAllInactiveEmployeeSummaries(Long hrId) {
         List<NewEmployee> employees = employeeRepository.findInactiveEmployeesByHrManagerIdNative(hrId);
 
-        if (employees.isEmpty()) {
-            throw new AppException("No inactive employees found", HttpStatus.NOT_FOUND);
-        }
+//        if (employees.isEmpty()) {
+//            throw new AppException("No inactive employees found", HttpStatus.NOT_FOUND);
+//        }
 
         return employeeMapper.toSummaryDTOs(employees);
     }

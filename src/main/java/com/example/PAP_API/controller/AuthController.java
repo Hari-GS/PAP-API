@@ -84,7 +84,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> loginUnified(@RequestBody @Valid CredentialsDto credentialsDto) {
         Object userDto = userService.loginUnified(credentialsDto);
-
+        System.out.println(credentialsDto);
         String email;
         String role;
 

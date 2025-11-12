@@ -12,7 +12,6 @@ import java.time.LocalDateTime;
 @Table(name = "new_employees")
 @Data
 @SQLDelete(sql = "UPDATE new_employees SET status = 'INACTIVE' WHERE id = ?")
-@Where(clause = "status <> 'INACTIVE'")
 public class NewEmployee {
 
     @Id

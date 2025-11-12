@@ -35,6 +35,7 @@ public class UserService {
     private final EmailService emailService;
     private final EmailTemplateService emailTemplateService;
 
+    private final UserContextService userContextService;
 
     @Autowired
     private OrganizationRepository organizationRepository;
@@ -141,6 +142,10 @@ public class UserService {
         if (employee.isPresent()) {
             if (passwordEncoder.matches(CharBuffer.wrap(credentials.getPassword()), employee.get().getPassword())) {
                 NewEmployeeDto dto = newEmployeeMapper.toDTO(employee.get()); // map employee
+                if(employee.get().getIsDirector()){
+                    dto.setRole("director");
+                    return dto;
+                }
                 dto.setRole("employee");
                 return dto;
             } else {
@@ -149,6 +154,15 @@ public class UserService {
         }
 
         throw new AppException("User not found", HttpStatus.NOT_FOUND);
+    }
+
+    public Long resolveHrIdForUser(){
+        UserDto user = userContextService.getCurrentUser();
+        if(user.getRole().equals("director")){
+            return newEmployeeRepository.findById(user.getId()).get().getHrManager().getId();
+        }else{
+            return userContextService.getCurrentUserId();
+        }
     }
 
 }

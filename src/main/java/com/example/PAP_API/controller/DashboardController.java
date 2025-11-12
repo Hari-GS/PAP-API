@@ -22,7 +22,7 @@ public class DashboardController {
 
     @GetMapping("/summary")
     public ResponseEntity<DashboardSummaryDto> getSummary() {
-        DashboardSummaryDto summary = dashboardService.getDashboardSummary(userContextService.getCurrentUserId());
+        DashboardSummaryDto summary = dashboardService.getDashboardSummary();
         return ResponseEntity.ok(summary);
     }
 }

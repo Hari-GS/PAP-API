@@ -11,6 +11,7 @@ import com.example.PAP_API.repository.HRManagerRepository;
 import com.example.PAP_API.repository.NewEmployeeRepository;
 import com.example.PAP_API.services.NewEmployeeService;
 import com.example.PAP_API.services.UserContextService;
+import com.example.PAP_API.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,6 +42,9 @@ public class NewEmployeeController {
     @Autowired
     private NewEmployeeRepository newEmployeeRepository;
 
+    @Autowired
+    private UserService userService;
+
     @GetMapping
     public ResponseEntity<List<NewEmployeeDto>> getAllEmployees() {
         return employeeService.getAllEmployees();
@@ -54,8 +58,13 @@ public class NewEmployeeController {
     @GetMapping("/summary")
     public ResponseEntity<List<NewEmployeeSummaryDto>> getAllEmployeesSummaries() {
         // Assuming you stored your UserDto in the principal during authentication
-        ;
-        Long hrId = userContext.getCurrentUserId();
+        Long hrId;
+        UserDto user = userContext.getCurrentUser();
+        if(user.getRole().equals("director")){
+            hrId = newEmployeeRepository.findById(user.getId()).get().getHrManager().getId();
+        }else{
+            hrId = userContext.getCurrentUserId();
+        }
         List<NewEmployeeSummaryDto> employees = employeeService.getAllEmployeeSummaries(hrId);
         return ResponseEntity.ok(employees);
     }
@@ -64,7 +73,7 @@ public class NewEmployeeController {
     public ResponseEntity<List<NewEmployeeSummaryDto>> getAllInactiveEmployeesSummaries() {
         // Assuming you stored your UserDto in the principal during authentication
         ;
-        Long hrId = userContext.getCurrentUserId();
+        Long hrId = userService.resolveHrIdForUser();
         List<NewEmployeeSummaryDto> employees = employeeService.getAllInactiveEmployeeSummaries(hrId);
         return ResponseEntity.ok(employees);
     }
@@ -111,9 +120,14 @@ public class NewEmployeeController {
     }
 
     @GetMapping("/by-hr/hierarchy")
-    public ResponseEntity<List<EmployeeHierarchyDto>> getHierarchy(Authentication authentication) {
-        UserDto user = (UserDto) authentication.getPrincipal();
-        Long hrId = user.getId();
+    public ResponseEntity<List<EmployeeHierarchyDto>> getHierarchy() {
+        Long hrId;
+        UserDto user = userContext.getCurrentUser();
+        if(user.getRole().equals("director")){
+            hrId = newEmployeeRepository.findById(user.getId()).get().getHrManager().getId();
+        }else{
+            hrId = userContext.getCurrentUserId();
+        }
         return ResponseEntity.ok(employeeService.getEmployeeHierarchy(hrId));
     }
 

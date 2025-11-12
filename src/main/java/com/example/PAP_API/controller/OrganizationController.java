@@ -1,5 +1,6 @@
 package com.example.PAP_API.controller;
 
+import com.example.PAP_API.config.AppProperties;
 import com.example.PAP_API.model.Organization;
 import com.example.PAP_API.repository.OrganizationRepository;
 import com.example.PAP_API.services.EmailService;
@@ -9,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.view.RedirectView;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +30,9 @@ public class OrganizationController {
 
     @Autowired
     EmailService emailService;
+
+    @Autowired
+    AppProperties appProperties;
 
     @PostMapping
     public Organization create(@RequestBody Organization organization) {
@@ -55,13 +60,13 @@ public class OrganizationController {
     }
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyOrganization(@RequestParam("token") String token) {
+    public RedirectView verifyOrganization(@RequestParam("token") String token) {
         Organization org = repository.findByVerificationToken(token)
                 .orElseThrow(() -> new RuntimeException("Invalid verification token."));
 
         if (org.getTokenExpiry().isBefore(LocalDateTime.now())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("Verification link has expired. Please register again.");
+            // Redirect with status message for expired token
+            return new RedirectView(appProperties.getLoginUrl()+"?status=expired");
         }
 
         org.setStatus("VERIFIED");
@@ -73,7 +78,8 @@ public class OrganizationController {
         String body = emailTemplateService.getOrganizationVerifiedEmailTemplate(org.getOrganizationName(), org.getOrganizationId());
         emailService.sendHtmlMail(org.getCompanyEmail(),"Your Organization Verified Successfully!",body);
 
-        return ResponseEntity.ok("Your organization verified successfully! Check your received email for organization ID");
+        // Redirect to frontend with success query parameter
+        return new RedirectView(appProperties.getLoginUrl()+"?status=success");
     }
 
 }

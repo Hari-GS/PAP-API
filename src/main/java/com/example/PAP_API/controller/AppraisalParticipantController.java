@@ -72,6 +72,7 @@ public class AppraisalParticipantController {
 
         EmployeeAppraisalSummaryDto dto = new EmployeeAppraisalSummaryDto();
         dto.setTitle(appraisal.getTitle());
+        dto.setType(appraisal.getType());
         dto.setSelfAppraisalEndDate(appraisal.getSelfAppraisalEndDate().toString());
         dto.setStatus(appraisalParticipant.get().getSelfAppraisalStatus().toString());
         dto.setAppraisalId(appraisal.getId());
@@ -99,6 +100,7 @@ public class AppraisalParticipantController {
 
        AppraisalDto dto = new AppraisalDto();
        dto.setTitle(appraisal.getTitle());
+       dto.setType(appraisal.getType());
        dto.setSelfAppraisalEndDate(appraisal.getSelfAppraisalEndDate().toString());
 
        return ResponseEntity.ok(dto);

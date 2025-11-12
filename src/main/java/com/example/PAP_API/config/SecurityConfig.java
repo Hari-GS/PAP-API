@@ -49,7 +49,7 @@ package com.example.PAP_API.config;
 //}
 //Commented out for deployment testing
 
-        import lombok.RequiredArgsConstructor;
+import lombok.RequiredArgsConstructor;
         import org.springframework.context.annotation.Bean;
         import org.springframework.context.annotation.Configuration;
         import org.springframework.http.HttpMethod;

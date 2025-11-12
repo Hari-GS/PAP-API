@@ -6,6 +6,7 @@ import com.example.PAP_API.model.Appraisal;
 import com.example.PAP_API.repository.AppraisalRepository;
 import com.example.PAP_API.services.AppraisalService;
 import com.example.PAP_API.services.UserContextService;
+import com.example.PAP_API.services.UserService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -30,6 +31,9 @@ public class AppraisalController {
     @Autowired
     AppraisalRepository appraisalRepo;
 
+    @Autowired
+    UserService userService;
+
     @PostMapping
     public ResponseEntity<String> createAppraisal(@RequestBody AppraisalDto dto) {
         Appraisal saved = appraisalService.saveAppraisal(dto,userContextService.getCurrentUserId());
@@ -38,7 +42,7 @@ public class AppraisalController {
 
     @GetMapping
     public ResponseEntity<List<AppraisalDto>> getAllAppraisals() {
-        List<Appraisal> appraisals = appraisalService.getAllAppraisals(userContextService.getCurrentUserId());
+        List<Appraisal> appraisals = appraisalService.getAllAppraisals(userService.resolveHrIdForUser());
         List<AppraisalDto> dtoList = appraisalMapper.toDtoList(appraisals);
         return ResponseEntity.ok(dtoList);
     }
@@ -58,7 +62,7 @@ public class AppraisalController {
 
     @GetMapping("/recent")
     public ResponseEntity<AppraisalDto> getMostRecentAppraisal() {
-        Long hrId = userContextService.getCurrentUserId();
+        Long hrId = userService.resolveHrIdForUser();
         Appraisal recent = appraisalRepo.findTopByHrManagerIdOrderByCreatedAtDescIdDesc(hrId)
                 .orElseThrow(() -> new EntityNotFoundException("No recent appraisals found"));
         return ResponseEntity.ok(appraisalMapper.toDto(recent));

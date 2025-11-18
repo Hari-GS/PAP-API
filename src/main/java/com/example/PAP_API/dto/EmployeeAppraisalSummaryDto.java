@@ -25,4 +25,7 @@ public class EmployeeAppraisalSummaryDto {
 
     private Integer selfQnsAnswered;
     private Long totalSelfQns;
+
+    private Integer totalManagerReviews;
+    private Integer totalManagerReviewsDone;
 }

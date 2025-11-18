@@ -77,7 +77,6 @@ public class SelfAppraisalService {
             AppraisalQuestion question = questionRepo.findById(dto.getQuestionId())
                     .orElseThrow(() -> new RuntimeException("Question not found"));
 
-            // Check if an answer already exists for this participant & question
             SelfAppraisalAnswer answer = answerRepo
                     .findByParticipantIdAndQuestionId(participant.getId(), dto.getQuestionId())
                     .orElseGet(SelfAppraisalAnswer::new);
@@ -87,8 +86,21 @@ public class SelfAppraisalService {
                 answer.setQuestion(question);
             }
 
-            // Update the answer text
-            answer.setAnswerText(dto.getAnswerText());
+            // Only set non-empty answers; treat empty as unanswered
+            String ansText = dto.getAnswerText();
+            if (ansText != null && !ansText.trim().isEmpty()) {
+                answer.setAnswerText(ansText.trim());
+            } else {
+                answer.setAnswerText(null); // store as null for unanswered
+            }
+
+            // Handle score field
+            if (dto.getAnswerScore() != null) {
+                answer.setAnswerScore(dto.getAnswerScore());
+            } else {
+                answer.setAnswerScore(null);
+            }
+
 
             answersToSave.add(answer);
         }
@@ -96,9 +108,10 @@ public class SelfAppraisalService {
         // Step 4: Save all (insert new / update existing)
         answerRepo.saveAll(answersToSave);
 
-        // Step 5: Determine status based on answered question count
-        int totalQuestions = questionRepo.countByParticipantId(participant.getId()); // you need to implement this if not present
-        int answeredCount = answerRepo.countByParticipantId(participant.getId());
+        // Step 5: Determine status based on answered (non-empty) count
+        int totalQuestions = questionRepo.countByParticipantId(participant.getId());
+        int answeredCount = answerRepo.countAnsweredQuestionsByParticipant(participant.getId());
+
 
         participant.setTotalQnsAnswered(answeredCount);
 
@@ -112,6 +125,7 @@ public class SelfAppraisalService {
 
         participantRepo.save(participant);
     }
+
 
     public List<AppraisalQuestionDto> getSelfAppraisalQuestions(Long appraisalId, UserDto userparticipant) {
         Long id;
@@ -170,33 +184,41 @@ public class SelfAppraisalService {
             SelfAppraisalAnswer answer = answerRepo.findById(dto.getAnswerId())
                     .orElseThrow(() -> new EntityNotFoundException("Answer not found with id: " + dto.getAnswerId()));
 
-            // Track the participant for this answer
             participantIds.add(answer.getParticipant().getId());
 
-            // Set the comment
-            answer.setReportingPersonComment(dto.getReportingPersonComment());
-            SelfAppraisalAnswer saved = answerRepo.save(answer);
+            // ✅ Validate and set manager's inputs
+            if (dto.getReportingPersonScore() != null &&
+                    (dto.getReportingPersonScore() < 1 || dto.getReportingPersonScore() > 10)) {
+                throw new IllegalArgumentException("Reporting person score must be between 1 and 10");
+            }
 
+            answer.setReportingPersonComment(dto.getReportingPersonComment());
+            answer.setReportingPersonScore(dto.getReportingPersonScore());
+
+            SelfAppraisalAnswer saved = answerRepo.save(answer);
             updatedAnswers.add(selfAppraisalAnswerMapper.toDTO(saved));
         }
 
-        // ✅ After saving all comments, check each participant's review status
+        // ✅ Update participant review status
         for (Long participantId : participantIds) {
             AppraisalParticipant participant = participantRepo.findById(participantId)
                     .orElseThrow(() -> new EntityNotFoundException("Participant not found with id: " + participantId));
 
-            // Fetch all answers for this participant
             List<SelfAppraisalAnswer> answers = answerRepo.findByParticipantId(participantId);
 
-            // Determine how many have comments
-            long commentedCount = answers.stream()
-                    .filter(a -> a.getReportingPersonComment() != null && !a.getReportingPersonComment().trim().isEmpty())
+            // ✅ Count answers where BOTH comment & score are provided
+            long reviewedCount = answers.stream()
+                    .filter(a ->
+                            a.getReportingPersonScore() != null &&
+                                    a.getReportingPersonComment() != null &&
+                                    !a.getReportingPersonComment().trim().isEmpty()
+                    )
                     .count();
 
-            // ✅ Set status based on comment progress
-            if (commentedCount == 0) {
+            // ✅ Update review progress status
+            if (reviewedCount == 0) {
                 participant.setReviewAppraisalStatus(Statuses.NOT_STARTED);
-            } else if (commentedCount < answers.size()) {
+            } else if (reviewedCount < answers.size()) {
                 participant.setReviewAppraisalStatus(Statuses.IN_PROGRESS);
             } else {
                 participant.setReviewAppraisalStatus(Statuses.SUBMITTED);
@@ -207,7 +229,6 @@ public class SelfAppraisalService {
 
         return updatedAnswers;
     }
-
 
 
 

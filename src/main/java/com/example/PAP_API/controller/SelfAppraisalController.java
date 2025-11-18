@@ -42,7 +42,6 @@ public class SelfAppraisalController {
     //Endpoint for reporting person to add comments
     @PutMapping("/self-appraisal/reporting-person-comment")
     public ResponseEntity<List<SelfAppraisalAnswerDto>> addReportingPersonComment(@RequestBody List<ReportingPersonDto> dtos){
-        System.out.println(dtos.toString());
         return ResponseEntity.ok(selfAppraisalService.addReportingPersonComment(dtos));
     }
 }

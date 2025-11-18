@@ -7,4 +7,5 @@ public class QuestionDTO {
     private Long id;
     private String text;
     private boolean showPoints;
+    private Boolean isDefault;
 }

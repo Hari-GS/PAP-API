@@ -26,8 +26,10 @@ public class Template {
     private List<Question> questions = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "hr_manager_id", nullable = false)
-    private HRManager hrManager;
+    @JoinColumn(name = "hr_manager_id", nullable = true)  // <-- allow NULL
+    private HRManager hrManager;  // NULL = global template
+
+    private Boolean isDefault;
 
     // Optional helper method for managing both sides of the relationship
     public void addQuestion(Question question) {

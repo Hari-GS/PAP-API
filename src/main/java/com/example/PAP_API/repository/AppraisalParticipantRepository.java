@@ -20,6 +20,8 @@ public interface AppraisalParticipantRepository extends JpaRepository<AppraisalP
 
     List<AppraisalParticipant> findByAppraisalIdAndReportingPersonId(Long appraisalId, Long reportingPersonId);
 
+    Integer countByAppraisalIdAndReportingPersonId(Long appraisalId, Long reportingPersonId);
+
     Optional<AppraisalParticipant> findByAppraisalIdAndReportingPersonIdAndId(
             Long appraisalId, Long reportingPersonId, Long id);
 
@@ -34,16 +36,27 @@ public interface AppraisalParticipantRepository extends JpaRepository<AppraisalP
     @Query("SELECT COUNT(p) FROM AppraisalParticipant p WHERE p.appraisal.id = :appraisalId AND p.reviewAppraisalStatus = :status")
     long countManagerReviewsCompleted(@Param("appraisalId") Long appraisalId, @Param("status") Statuses status);
 
+    Integer countByAppraisalIdAndReportingPersonIdAndReviewAppraisalStatus(
+            Long appraisalId,
+            Long reportingPersonId,
+            Statuses reviewAppraisalStatus
+    );
+
+
     // ✅ New method: count participants that actually have a reporting person
     @Query("SELECT COUNT(p) FROM AppraisalParticipant p WHERE p.appraisal.id = :appraisalId AND p.reportingPerson IS NOT NULL")
     long countParticipantsWithReportingPerson(@Param("appraisalId") Long appraisalId);
 
     // Find the active appraisal for the employee
-    @Query("SELECT ap FROM AppraisalParticipant ap " +
-            "WHERE ap.participant.id = :id " +
-            "AND ap.appraisal.stage <> 'CLOSED' " +
-            "ORDER BY ap.appraisal.startDate DESC LIMIT 1")
-    Optional<AppraisalParticipant> findActiveAppraisalByEmployeeId(Long id);
+    @Query("""
+    SELECT ap 
+    FROM AppraisalParticipant ap
+    WHERE ap.participant.id = :id
+      AND ap.appraisal.stage <> 'CLOSED'
+    ORDER BY ap.appraisal.startDate DESC, ap.appraisal.id DESC
+    """)
+    Optional<List<AppraisalParticipant>> findActiveAppraisalsByEmployeeId(@Param("id") Long id);
+
 
     // Find the most recent appraisal if no active one
     @Query("SELECT ap FROM AppraisalParticipant ap " +

@@ -25,12 +25,12 @@ public class TemplateService {
 
     public List<Template> getAllTemplates() {
         Long currentHRId = userContextService.getCurrentUserId();
-        return templateRepository.findByHrManager_Id(currentHRId);
+        return templateRepository.findDefaultAndHrTemplates(currentHRId);
     }
 
     public Template getTemplateById(Long id) {
         Long currentHRId = userContextService.getCurrentUserId();
-        return templateRepository.findByIdAndHrManager_Id(id, currentHRId)
+        return templateRepository.findAccessibleTemplate(id, currentHRId)
                 .orElseThrow(() -> new RuntimeException("Template not found or access denied"));
     }
 

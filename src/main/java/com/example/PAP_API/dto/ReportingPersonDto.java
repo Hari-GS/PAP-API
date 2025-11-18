@@ -6,4 +6,5 @@ import lombok.Data;
 public class ReportingPersonDto {
     private Long answerId;
     private String reportingPersonComment;
+    private Integer reportingPersonScore;
 }

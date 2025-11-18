@@ -15,6 +15,11 @@ public class ParticipantReportDto {
     private String appraisalType;
     private String appraisalStage;
 
+    private Double averageSelfScore;
+    private Double averageManagerScore;
+    private Double scoreDifference;
+    private Double agreementPercentage;
+
     private List<ReviewAnswerDto> selfReview;
     private List<ReviewAnswerDto> reportingReview;
 }

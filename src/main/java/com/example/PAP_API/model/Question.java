@@ -13,6 +13,7 @@ public class Question {
 
     private String text;
     private boolean showPoints;
+    private Boolean isDefault;
 
     @Column(name = "order_index")
     private Integer orderIndex;

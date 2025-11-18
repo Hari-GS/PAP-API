@@ -3,10 +3,12 @@ package com.example.PAP_API.controller;
 import com.example.PAP_API.dto.AppraisalDto;
 import com.example.PAP_API.dto.EmployeeAppraisalSummaryDto;
 import com.example.PAP_API.dto.UserDto;
+import com.example.PAP_API.enums.Statuses;
 import com.example.PAP_API.mappers.AppraisalMapper;
 import com.example.PAP_API.model.Appraisal;
 import com.example.PAP_API.model.AppraisalParticipant;
 import com.example.PAP_API.model.NewEmployee;
+import com.example.PAP_API.repository.AppraisalParticipantRepository;
 import com.example.PAP_API.repository.AppraisalRepository;
 import com.example.PAP_API.repository.NewEmployeeRepository;
 import com.example.PAP_API.services.AppraisalParticipantService;
@@ -36,6 +38,9 @@ public class AppraisalParticipantController {
 
     @Autowired
     AppraisalRepository appraisalRepository;
+
+    @Autowired
+    AppraisalParticipantRepository appraisalParticipantRepository;
 
     public AppraisalParticipantController(AppraisalParticipantService participantService) {
         this.participantService = participantService;
@@ -94,13 +99,34 @@ public class AppraisalParticipantController {
         return ResponseEntity.ok(dto);
     }
 
+    @GetMapping("/current-participant/manager-review-data")
+    public ResponseEntity<EmployeeAppraisalSummaryDto> getCurrentManagerAppraisalDataForLoggedInEmployee() {
+        Optional<AppraisalParticipant> appraisalParticipant = participantService.getCurrentAppraisalForEmployee(newEmployeeRepository.findById(userContextService.getCurrentUserId()).get().getId());
+
+        if (appraisalParticipant.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        Appraisal appraisal = appraisalParticipant.get().getAppraisal();
+
+        EmployeeAppraisalSummaryDto dto = new EmployeeAppraisalSummaryDto();
+        dto.setTotalManagerReviewsDone(appraisalParticipantRepository.countByAppraisalIdAndReportingPersonIdAndReviewAppraisalStatus(appraisal.getId(), userContextService.getCurrentUserId(), Statuses.SUBMITTED));
+        dto.setTotalManagerReviews(appraisalParticipantRepository.countByAppraisalIdAndReportingPersonId(appraisal.getId(), userContextService.getCurrentUserId()));
+        dto.setEndDate(appraisal.getEndDate().toString());
+        return ResponseEntity.ok(dto);
+    }
+
     @GetMapping("/{id}/employee")
     public ResponseEntity<AppraisalDto> getAppraisal(@PathVariable Long id){
        Appraisal appraisal = appraisalRepository.findById(id).get();
 
        AppraisalDto dto = new AppraisalDto();
+       dto.setId(appraisal.getId());
        dto.setTitle(appraisal.getTitle());
        dto.setType(appraisal.getType());
+       dto.setStage(appraisal.getStage());
+       dto.setStartDate(appraisal.getStartDate().toString());
+       dto.setEndDate(appraisal.getEndDate().toString());
        dto.setSelfAppraisalEndDate(appraisal.getSelfAppraisalEndDate().toString());
 
        return ResponseEntity.ok(dto);

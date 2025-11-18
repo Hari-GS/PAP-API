@@ -8,4 +8,5 @@ public class TemplateDTO {
     private Long id;
     private String title;
     private List<QuestionDTO> questions;
+    private Boolean isDefault;
 }

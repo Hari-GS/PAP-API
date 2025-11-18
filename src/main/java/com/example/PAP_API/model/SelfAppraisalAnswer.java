@@ -14,8 +14,10 @@ public class SelfAppraisalAnswer {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Integer answerScore;
     private String answerText;
 
+    private Integer reportingPersonScore;
     private String reportingPersonComment;
 
     @ManyToOne

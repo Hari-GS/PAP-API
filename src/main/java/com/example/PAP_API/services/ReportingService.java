@@ -75,24 +75,63 @@ public class ReportingService {
 
         // 4️⃣ Map answers to DTO lists
         List<ReviewAnswerDto> selfReviews = answers.stream()
-                .map(a -> new ReviewAnswerDto(
-                        a.getQuestion().getText(),
-                        a.getAnswerText()
-                ))
+                .map(a -> {
+                    ReviewAnswerDto dtoItem = new ReviewAnswerDto();
+                    dtoItem.setQuestion(a.getQuestion().getText());
+                    dtoItem.setAnswer(a.getAnswerText());
+                    dtoItem.setScore(a.getAnswerScore()); // 🟢 self score
+                    return dtoItem;
+                })
                 .collect(Collectors.toList());
 
         List<ReviewAnswerDto> reportingReviews = answers.stream()
-                .filter(a -> a.getReportingPersonComment() != null && !a.getReportingPersonComment().isEmpty())
-                .map(a -> new ReviewAnswerDto(
-                        a.getQuestion().getText(),
-                        a.getReportingPersonComment()
-                ))
+                .filter(a -> a.getReportingPersonComment() != null || a.getReportingPersonScore() != null)
+                .map(a -> {
+                    ReviewAnswerDto dtoItem = new ReviewAnswerDto();
+                    dtoItem.setQuestion(a.getQuestion().getText());
+                    dtoItem.setAnswer(a.getReportingPersonComment());
+                    dtoItem.setScore(a.getReportingPersonScore()); // 🟡 manager score
+                    return dtoItem;
+                })
                 .collect(Collectors.toList());
 
         dto.setSelfReview(selfReviews);
         dto.setReportingReview(reportingReviews);
 
+        // 5️⃣ Compute Self vs Manager Score Comparison
+        double avgSelfScore = answers.stream()
+                .filter(a -> a.getAnswerScore() != null)
+                .mapToDouble(SelfAppraisalAnswer::getAnswerScore)
+                .average()
+                .orElse(0.0);
+
+        double avgManagerScore = answers.stream()
+                .filter(a -> a.getReportingPersonScore() != null)
+                .mapToDouble(SelfAppraisalAnswer::getReportingPersonScore)
+                .average()
+                .orElse(0.0);
+
+        double scoreDifference = avgManagerScore - avgSelfScore;
+
+        // 6️⃣ Compute Manager–Self Agreement %
+        double maxScore = 10.0; // Assuming 10-point scale
+        double agreementPercentage = 100 - (Math.abs(avgManagerScore - avgSelfScore) / maxScore * 100);
+        if (avgSelfScore == 0 && avgManagerScore == 0) {
+            agreementPercentage = 0.0;
+        }
+
+        dto.setAverageSelfScore(round(avgSelfScore));
+        dto.setAverageManagerScore(round(avgManagerScore));
+        dto.setScoreDifference(round(scoreDifference));
+        dto.setAgreementPercentage(round(agreementPercentage));
+
         return dto;
     }
+
+    // 🔹 Helper method to round to 2 decimals
+    private double round(double value) {
+        return Math.round(value * 100.0) / 100.0;
+    }
+
 
 }

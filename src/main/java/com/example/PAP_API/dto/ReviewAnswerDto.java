@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class ReviewAnswerDto {
     private String question;
     private String answer;
+    private Integer score;
 }

@@ -25,7 +25,7 @@ public class DashboardService {
     public DashboardSummaryDto getDashboardSummary() {
         Long hrId = userService.resolveHrIdForUser();
         // Get the most recent appraisal for this HR
-        Appraisal recentAppraisal = appraisalRepo.findTopByHrManagerIdOrderByEndDateDesc(hrId)
+        Appraisal recentAppraisal = appraisalRepo.findTopByHrManagerIdOrderByIdDesc(hrId)
                 .orElseThrow(() -> new EntityNotFoundException("No recent appraisals found"));
 
         Long appraisalId = recentAppraisal.getId();

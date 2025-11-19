@@ -16,7 +16,9 @@ public interface NewEmployeeRepository extends JpaRepository<NewEmployee, Long> 
     List<NewEmployee> findByHrManagerId(Long id);
 
     @Query(
-            value = "SELECT * FROM new_employees e WHERE e.status = 'ACTIVE' OR e.status = 'INVITED' AND e.hr_manager_id = :hrManagerId",
+            value = "SELECT * FROM new_employees e " +
+                    "WHERE (e.status = 'ACTIVE' OR e.status = 'INVITED') " +
+                    "AND e.hr_manager_id = :hrManagerId",
             nativeQuery = true
     )
     List<NewEmployee> findActiveEmployeesByHrManagerIdNative(@Param("hrManagerId") Long hrManagerId);
